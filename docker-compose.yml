@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: postgres_datasus
+    restart: always
+    environment:
+      POSTGRES_USER: datasus
+      POSTGRES_PASSWORD: datasus
+      POSTGRES_DB: datasus
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
