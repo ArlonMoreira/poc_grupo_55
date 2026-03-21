@@ -49,6 +49,18 @@ def container_running():
 
 
 # ----------------------------
+# GARANTIR RESTART POLICY
+# ----------------------------
+def ensure_restart_policy():
+
+    subprocess.run(
+        ["docker", "update", "--restart", "unless-stopped", CONTAINER_NAME],
+        capture_output=True,
+        text=True
+    )
+
+
+# ----------------------------
 # SUBIR POSTGRES
 # ----------------------------
 def start_postgres():
@@ -60,6 +72,7 @@ def start_postgres():
         subprocess.run([
             "docker", "run", "-d",
             "--name", CONTAINER_NAME,
+            "--restart", "unless-stopped",
             "-e", f"POSTGRES_USER={POSTGRES_USER}",
             "-e", f"POSTGRES_PASSWORD={POSTGRES_PASSWORD}",
             "-e", f"POSTGRES_DB={POSTGRES_DB}",
@@ -71,10 +84,12 @@ def start_postgres():
 
         print("Iniciando container postgres existente...")
 
+        ensure_restart_policy()
         subprocess.run(["docker", "start", CONTAINER_NAME])
 
     else:
 
+        ensure_restart_policy()
         print("Postgres já está rodando")
 
 
