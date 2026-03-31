@@ -55,6 +55,10 @@ Thumbs.db
 *.exe
 *.war
 
+# Output directory
+output/*
+!output/.gitkeep
+
 # Large media files
 *.mp4
 *.tiff

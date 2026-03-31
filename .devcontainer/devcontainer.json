@@ -1,0 +1,18 @@
+{
+  "name": "SIH/SUS Agent",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "agent",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python"
+      }
+    }
+  },
+  "postCreateCommand": "echo 'Container ready. Place internacoes.csv in /workspace and run: python carga/load_csv_postgress_auto.py'"
+}

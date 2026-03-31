@@ -32,6 +32,8 @@ def main() -> None:
         print("RESPOSTA FINAL")
         print("=" * 60)
         print(result.response)
+        if result.visualization_path:
+            print(f"\n[Visualização salva em: {result.visualization_path}]")
         return
 
     # Interactive loop
@@ -55,6 +57,8 @@ def main() -> None:
         print("RESPOSTA FINAL")
         print("=" * 60)
         print(result.response)
+        if result.visualization_path:
+            print(f"\n[Visualização salva em: {result.visualization_path}]")
 
 
 if __name__ == "__main__":

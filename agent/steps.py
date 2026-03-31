@@ -13,7 +13,7 @@ import json
 from groq import Groq
 
 from agent.config import DB_TABLE, GROQ_API_KEY, GROQ_MODEL, load_schema
-from agent.tools import analyze_data
+from agent.tools import analyze_data, generate_visualization
 
 _client: Groq | None = None
 _schema: str | None = None
@@ -147,6 +147,65 @@ Baseie-se EXCLUSIVAMENTE nos dados fornecidos. Não invente valores."""
         system,
         f"Pergunta: {question}\n\nSQL executada:\n{sql}\n\nResultados:\n{preview}",
     )
+
+
+# ---------------------------------------------------------------------------
+# Step 4.5 — Visualization Decider + Generator
+# ---------------------------------------------------------------------------
+
+def decide_and_visualize(question: str, analysis: str, columns: list, rows: list) -> str | None:
+    """Ask the LLM if a chart or table would be useful, then generate it.
+
+    Returns the absolute path to the generated PNG, or None when not applicable.
+    """
+    sample = json.dumps(
+        {"columns": columns, "sample_rows": rows[:5]},
+        ensure_ascii=False,
+        default=str,
+    )
+
+    system = """Você é um especialista em visualização de dados de saúde pública.
+
+Analise a pergunta, a análise textual e a amostra dos dados e decida se seria útil gerar
+um gráfico ou tabela visual para complementar a resposta.
+
+Retorne APENAS um JSON válido com a seguinte estrutura (sem texto adicional, sem markdown):
+{
+  "type": "bar" | "horizontal_bar" | "line" | "pie" | "table" | "none",
+  "x_column": "<nome exato da coluna para categorias / eixo X>",
+  "y_column": "<nome exato da coluna numérica para valores / eixo Y>",
+  "title": "<título descritivo para o gráfico>",
+  "reason": "<justificativa breve>"
+}
+
+Diretrizes de escolha:
+- "bar"            → ranking ou comparação com até 15 categorias de nome curto
+- "horizontal_bar" → ranking com nomes longos (procedimentos, municípios, CIDs)
+- "line"           → série temporal (meses, trimestres, anos em sequência)
+- "pie"            → proporções com no máximo 6 categorias
+- "table"          → resultado com múltiplas colunas relevantes e ≤ 20 linhas
+- "none"           → dado único, texto livre ou visualização não agrega valor
+
+x_column e y_column DEVEM ser nomes exatos presentes no campo "columns" da amostra.
+Para "table", preencha x_column e y_column com strings vazias."""
+
+    raw = _chat(
+        system,
+        f"Pergunta: {question}\n\nAnálise:\n{analysis}\n\nDados (amostra):\n{sample}",
+        temperature=0.0,
+    )
+
+    # Parse the LLM JSON response
+    try:
+        clean = raw.strip()
+        if clean.startswith("```"):
+            lines = clean.splitlines()
+            clean = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+        viz_decision = json.loads(clean)
+    except Exception:
+        return None
+
+    return generate_visualization(columns, rows, viz_decision)
 
 
 # ---------------------------------------------------------------------------

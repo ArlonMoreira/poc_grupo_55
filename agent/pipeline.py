@@ -8,11 +8,25 @@ Orchestrates the full analytical pipeline described in section 6.3:
   5. Verifier         → consistency check / guardrails
   6. Communicator     → accessible final response
 """
+import glob
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 
 from agent import steps
 from agent.tools import execute_sql
+
+
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "output")
+
+
+def _clear_output_dir() -> None:
+    """Remove all files inside the output directory before a new question."""
+    if not os.path.isdir(OUTPUT_DIR):
+        return
+    for file_path in glob.glob(os.path.join(OUTPUT_DIR, "*")):
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
 
 @dataclass
@@ -22,6 +36,7 @@ class AnalysisResult:
     sql: str = ""
     raw_result: dict = field(default_factory=dict)
     analysis: str = ""
+    visualization_path: Optional[str] = None
     verification: str = ""
     response: str = ""
     error: Optional[str] = None
@@ -37,6 +52,7 @@ def run(question: str, verbose: bool = True) -> AnalysisResult:
     Returns:
         An AnalysisResult with all intermediate outputs and the final response.
     """
+    _clear_output_dir()
     result = AnalysisResult(question=question)
 
     def log(step: str, content: str) -> None:
@@ -92,6 +108,20 @@ def run(question: str, verbose: bool = True) -> AnalysisResult:
         # ------------------------------------------------------------------
         result.analysis = steps.analyze(question, result.sql, result.raw_result)
         log("ANALYST", result.analysis)
+
+        # ------------------------------------------------------------------
+        # Step 4.5 — Visualization (decide + generate)
+        # ------------------------------------------------------------------
+        result.visualization_path = steps.decide_and_visualize(
+            question,
+            result.analysis,
+            result.raw_result["columns"],
+            result.raw_result["rows"],
+        )
+        if result.visualization_path:
+            log("VISUALIZER", f"Imagem gerada: {result.visualization_path}")
+        else:
+            log("VISUALIZER", "Nenhuma visualização gerada para esta consulta.")
 
         # ------------------------------------------------------------------
         # Step 5 — Verifier / Guardrails
