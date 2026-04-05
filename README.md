@@ -79,10 +79,32 @@ O VS Code irá:
 
 ## 4. Carregar os Dados
 
-Com o container aberto, execute no terminal integrado:
+Depois de abrir o projeto no Dev Container, siga estes passos dentro do terminal do container:
+
+1. Entre na pasta `carga`:
 
 ```bash
-python carga/load_csv_postgress_auto.py
+cd carga
+```
+
+2. Ative o ambiente virtual Python do projeto. Se o ambiente ainda não existir, crie-o primeiro:
+
+```bash
+python3 -m venv ../venv
+source ../venv/bin/activate
+```
+obs.: Esse ambiente é específico pra carga, então deve ser ativado dentro da pasta /carga e usar o requirements.txt que está dentro da pasta /carga
+
+3. Instale as dependências necessárias no ambiente virtual:
+
+```bash
+pip install -r ../requirements.txt
+```
+
+4. Execute o script de carga:
+
+```bash
+python load_csv_postgress_auto.py
 ```
 
 > Isso só precisa ser feito uma vez. Os dados ficam persistidos no volume `postgres_data`.
