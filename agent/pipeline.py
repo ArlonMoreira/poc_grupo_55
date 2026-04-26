@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from agent import steps
-from agent.tools import execute_sql
+from agent.tools import execute_sql, fetch_table_sample
 
 
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "output")
@@ -32,6 +32,8 @@ def _clear_output_dir() -> None:
 @dataclass
 class AnalysisResult:
     question: str
+    table_name: str = ""
+    sample_context: dict = field(default_factory=dict)
     plan: str = ""
     sql: str = ""
     raw_result: dict = field(default_factory=dict)
@@ -65,15 +67,39 @@ def run(question: str, verbose: bool = True) -> AnalysisResult:
 
     try:
         # ------------------------------------------------------------------
+        # Step 0 — Table Selector
+        # ------------------------------------------------------------------
+        result.table_name = steps.route_table(question)
+        log("ROUTER", f"Tabela selecionada: {result.table_name}")
+
+        # ------------------------------------------------------------------
+        # Step 0.5 — Table Sample
+        # ------------------------------------------------------------------
+        result.sample_context = fetch_table_sample(result.table_name, limit=5)
+        if result.sample_context.get("success"):
+            log(
+                "SAMPLE",
+                f"Amostra carregada: {result.sample_context.get('row_count', 0)} linhas. "
+                f"Colunas: {result.sample_context.get('columns', [])}",
+            )
+        else:
+            log("SAMPLE", f"Falha ao carregar amostra: {result.sample_context.get('error')}")
+
+        # ------------------------------------------------------------------
         # Step 1 — Planner / Router
         # ------------------------------------------------------------------
-        result.plan = steps.plan(question)
+        result.plan = steps.plan(question, result.table_name, result.sample_context)
         log("PLANNER", result.plan)
 
         # ------------------------------------------------------------------
         # Step 2 — SQL Builder
         # ------------------------------------------------------------------
-        result.sql = steps.build_sql(result.plan, question)
+        result.sql = steps.build_sql(
+            result.plan,
+            question,
+            result.table_name,
+            sample_context=result.sample_context,
+        )
         log("SQL BUILDER", result.sql)
 
         # ------------------------------------------------------------------
@@ -83,7 +109,13 @@ def run(question: str, verbose: bool = True) -> AnalysisResult:
 
         if not result.raw_result["success"]:
             log("EXECUTOR", f"SQL error: {result.raw_result['error']} — retrying with error context...")
-            result.sql = steps.build_sql(result.plan, question, error_context=result.raw_result["error"])
+            result.sql = steps.build_sql(
+                result.plan,
+                question,
+                result.table_name,
+                sample_context=result.sample_context,
+                error_context=result.raw_result["error"],
+            )
             log("SQL BUILDER (retry)", result.sql)
             result.raw_result = execute_sql(result.sql)
 

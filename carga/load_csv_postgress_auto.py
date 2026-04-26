@@ -83,7 +83,7 @@ def load_both_csvs():
             "output_path": "../internacoes.csv"
         },
         "ambulatorial": {
-            "file_id": "1N0PANWM7sAsok27dlrTbpF8CC7EajXpu",
+            "file_id": "1LgwN7YpbD0lHflRYgVjRDB9TjCJJoKhz",
             "output_path": "../ambulatorial.csv"
         }
     }

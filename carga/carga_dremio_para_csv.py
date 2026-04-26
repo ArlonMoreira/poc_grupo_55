@@ -69,6 +69,8 @@ SELECT
     PA_OBITO AS PACIENTE_OBITO,
     CAST(sigtap.dsig_ipcod AS VARCHAR) AS PROCEDIMENTO_CODIGO,
     sigtap.dsig_ipdscr AS PROCEDIMENTO_DESCRICAO,
+    sigtap.dsig_nogrupo AS PROCEDIMENTO_GRUPO,
+    sigtap.dsig_nosubgr AS PROCEDIMENTO_SUBGRUPO,
     TO_DATE(CAST(PA_CMP AS VARCHAR), 'yyyyMM') AS PERIODO_PROCEDIMENTO,
     cid.dcid_cid10_codigo CID_CODIGO,
     CASE

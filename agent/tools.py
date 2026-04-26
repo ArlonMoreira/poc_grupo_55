@@ -10,6 +10,7 @@ import time
 import matplotlib
 matplotlib.use("Agg")  # non-interactive backend — must be set before pyplot import
 import matplotlib.pyplot as plt
+from agent.config import AVAILABLE_TABLES
 import pandas as pd
 import psycopg2
 
@@ -94,6 +95,16 @@ def analyze_data(columns: list, rows: list) -> dict:
 
     return summary
 
+# ---------------------------------------------------------------------------
+# Buscar amostra de dados
+# ---------------------------------------------------------------------------
+def fetch_table_sample(table_name: str, limit: int = 5) -> dict:
+    if table_name not in AVAILABLE_TABLES:
+        return {"success": False, "columns": [], "rows": [], "row_count": 0, "truncated": False, "error": "Tabela inválida"}
+    
+    query = f'SELECT * FROM {table_name} ORDER BY RANDOM() LIMIT {int(limit)}'
+    
+    return execute_sql(query)
 
 # ---------------------------------------------------------------------------
 # Visualization tool

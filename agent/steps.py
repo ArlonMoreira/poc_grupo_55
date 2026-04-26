@@ -12,7 +12,14 @@ import json
 
 from groq import Groq
 
-from agent.config import DB_TABLE, GROQ_API_KEY, GROQ_MODEL, load_schema
+from agent.config import (
+    AVAILABLE_TABLES,
+    DEFAULT_TABLE,
+    GROQ_API_KEY,
+    GROQ_MODEL,
+    TABLE_CONTEXT,
+    load_schema,
+)
 from agent.tools import analyze_data, generate_visualization
 
 _client: Groq | None = None
@@ -46,19 +53,73 @@ def _chat(system: str, user: str, temperature: float = 0.1) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Step 0 — Table Selector
+# ---------------------------------------------------------------------------
+
+def route_table(question: str) -> str:
+    """Decide qual tabela usar com base no contexto da pergunta."""
+    table_guide = "\n".join(
+        [
+            f"- {name}: {meta['description']} | exemplos: {meta['examples']}"
+            for name, meta in TABLE_CONTEXT.items()
+        ]
+    )
+
+    system = f"""Você é um roteador semântico de consultas de saúde pública.
+Escolha exatamente UMA tabela alvo para a pergunta do usuário.
+
+Tabelas disponíveis:
+{table_guide}
+
+Retorne APENAS um JSON válido:
+{{"table": "<nome_da_tabela>", "reason": "<justificativa_curta>"}}
+
+Regras:
+- "table" deve ser uma entre: {", ".join(AVAILABLE_TABLES)}
+- Se a pergunta for ambígua, use "{DEFAULT_TABLE}".
+- Não inclua markdown, nem texto fora do JSON.
+"""
+
+    raw = _chat(system, f"Pergunta: {question}", temperature=0.0).strip()
+    if raw.startswith("```"):
+        lines = raw.splitlines()
+        raw = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+
+    try:
+        parsed = json.loads(raw)
+        selected = parsed.get("table", DEFAULT_TABLE)
+    except Exception:
+        selected = DEFAULT_TABLE
+
+    if selected not in AVAILABLE_TABLES:
+        selected = DEFAULT_TABLE
+
+    return selected
+
+# ---------------------------------------------------------------------------
 # Step 1 — Planner / Router
 # ---------------------------------------------------------------------------
 
-def plan(question: str) -> str:
+def plan(question: str, table_name: str, sample_context: dict | None = None) -> str:
     """Interpret the analytical intent and produce a structured action plan."""
+    sample_preview = "Amostra indisponível."
+    if sample_context and sample_context.get("success"):
+        payload = {
+            "columns": sample_context.get("columns", []),
+            "sample_rows": sample_context.get("rows", [])[:5],
+        }
+        sample_preview = json.dumps(payload, ensure_ascii=False, default=str, indent=2)
+
     system = f"""Você é um planejador analítico especializado em dados de saúde pública do SUS.
 
 Sua função é interpretar a pergunta do usuário e definir um plano de análise claro.
 
-Schema da base de dados:
-{_get_schema()}
+Schema da base de dados: {load_schema(table_name)}
 
-Tabela principal: {DB_TABLE}
+Tabela principal: {table_name}
+
+Amostra real da tabela (use para inferir formatos e padrões):
+{sample_preview}
 
 Retorne um plano estruturado com:
 1. Tipo de análise (série temporal, ranking, comparação, análise territorial, custos, perfil de procedimentos, mortalidade, etc.)
@@ -76,8 +137,22 @@ Seja específico e objetivo. Não gere SQL nesta etapa."""
 # Step 2 — SQL Builder
 # ---------------------------------------------------------------------------
 
-def build_sql(plan_text: str, question: str, error_context: str = "") -> str:
+def build_sql(
+    plan_text: str,
+    question: str,
+    table_name: str,
+    sample_context: dict | None = None,
+    error_context: str = "",
+) -> str:
     """Convert the analysis plan into a valid PostgreSQL query."""
+    sample_preview = "Amostra indisponível."
+    if sample_context and sample_context.get("success"):
+        payload = {
+            "columns": sample_context.get("columns", []),
+            "sample_rows": sample_context.get("rows", [])[:5],
+        }
+        sample_preview = json.dumps(payload, ensure_ascii=False, default=str, indent=2)
+
     error_note = (
         f"\n\nATENÇÃO: A query anterior falhou com o seguinte erro — corrija-o:\n{error_context}"
         if error_context
@@ -88,17 +163,35 @@ def build_sql(plan_text: str, question: str, error_context: str = "") -> str:
 
 Com base no plano de análise e no schema da base de dados, gere uma consulta SQL válida para PostgreSQL.
 
-Schema da base de dados:
-{_get_schema()}
+Schema da base de dados: {load_schema(table_name)}
 
-Tabela: {DB_TABLE}
+Tabela: {table_name}
+
+Amostra real da tabela (use para inferir formatos e padrões):
+{sample_preview}
 
 Regras obrigatórias:
-- Use APENAS a tabela '{DB_TABLE}'
+- Use APENAS a tabela '{table_name}'
+- Use a amostra para inferir se campos de data estão como texto; quando necessário, use cast ::date.
+- Use a amosra pra você entender o tipo de dado de cada coluna e como os dados estão sendo apresentados para fazer corretamente a consulta sql.
+- Em filtros textuais, prefira ILIKE (case-insensitive).
+- Não assuma colunas que não aparecem no schema/amostra.
+- Leve em consideração as assentuações como "diagnóstico por radiologia" ao invés de "diagnostico por radiologia"
+- Quando a pergunta mencionar tipos de exame/procedimento (ex.: tomografia, ultrassonografia, teste rápido, laboratório),
+  priorize filtro por "PROCEDIMENTO_SUBGRUPO"; use "PROCEDIMENTO_GRUPO" e "PROCEDIMENTO_DESCRICAO" como complemento.
 - Retorne SOMENTE a query SQL pura — sem explicações, sem markdown, sem ```sql
 - Os nomes das colunas no banco são em MAIÚSCULAS (ex: N_AIH, PACIENTE_IDADE, VAL_TOT)
   Use aspas duplas ao referenciar colunas com letras maiúsculas: "N_AIH", "VAL_TOT"
-- Para datas use DATE_TRUNC, EXTRACT ou filtros com casting: "DATA_INTERNACAO"::date
+- Para busca textual sem sensibilidade a maiúsculas/minúsculas, prefira ILIKE.
+- Se usar LIKE em campos textuais, normalize obrigatoriamente com UPPER(...) ou LOWER(...):
+  Exemplo: UPPER("PROCEDIMENTO_DESCRICAO") LIKE UPPER('%consulta%')
+- Para qualquer coluna de data que esteja como texto, faça cast explícito antes de usar funções de data.
+  Exemplos válidos:
+  - EXTRACT(YEAR FROM "PERIODO_PROCEDIMENTO"::date)
+  - DATE_TRUNC('month', "PERIODO_PROCEDIMENTO"::date)
+  - "PERIODO_PROCEDIMENTO"::date BETWEEN DATE '2023-01-01' AND DATE '2023-12-31'
+- Em perguntas de total (ex.: "quantas consultas"), retorne um único agregado principal (COUNT/SUM)
+  e evite GROUP BY desnecessário, salvo quando o usuário pedir detalhamento por mês, município, CID etc.
 - PACIENTE_OBITO: 0 = vivo, 1 = óbito
 - Limite resultados a {2000} linhas com LIMIT quando necessário
 - Use aliases descritivos nas colunas de resultado{error_note}"""
