@@ -11,7 +11,7 @@ DB_PORT = os.getenv("DB_PORT", "5432")
 DB_USER = os.getenv("DB_USER", "datasus")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "datasus")
 DB_NAME = os.getenv("DB_NAME", "datasus")
-DB_TABLE = "internacoes"
+DB_TABLES = ["public.internacoes", "public.atendimentos_ambulatorial"]
 
 # Groq
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")

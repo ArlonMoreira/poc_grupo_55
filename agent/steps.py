@@ -12,7 +12,7 @@ import json
 
 from groq import Groq
 
-from agent.config import DB_TABLE, GROQ_API_KEY, GROQ_MODEL, load_schema
+from agent.config import DB_TABLES, GROQ_API_KEY, GROQ_MODEL, load_schema
 from agent.tools import analyze_data, generate_visualization
 
 _client: Groq | None = None
@@ -45,27 +45,93 @@ def _chat(system: str, user: str, temperature: float = 0.1) -> str:
     return resp.choices[0].message.content.strip()
 
 
+def _parse_json_response(raw: str, fallback: dict) -> dict:
+    """Strip markdown fences and parse a JSON response from the LLM."""
+    clean = raw.strip()
+    if clean.startswith("```"):
+        lines = clean.splitlines()
+        clean = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+    try:
+        return json.loads(clean)
+    except Exception:
+        return fallback
+
+
+# ---------------------------------------------------------------------------
+# Step 0 — Question Guardrail
+# ---------------------------------------------------------------------------
+
+def guardrail_question(question: str) -> dict:
+    """Validate whether the user's question is relevant to the project's domain.
+
+    Returns a dict with keys:
+        valid  (bool)
+        reason (str)
+    """
+    system = """Você é um guardião de qualidade para um agente de análise de dados de saúde pública do SUS.
+
+O agente é especializado EXCLUSIVAMENTE em responder perguntas sobre:
+- Internações hospitalares (SIH/SUS) — dados do DATASUS, estado de Goiás
+- Atendimentos ambulatoriais (SIA/SUS) — dados do DATASUS, estado de Goiás
+
+Avalie se a pergunta do usuário é relevante para este domínio.
+
+São perguntas VÁLIDAS:
+- Perguntas sobre internações, AIHs, diagnósticos, procedimentos hospitalares, altas, óbitos hospitalares
+- Perguntas sobre atendimentos ambulatoriais, consultas, procedimentos, produção ambulatorial
+- Perguntas sobre custos, valores pagos, frequência ou tendências relacionadas aos dados SIH/SIA
+- Perguntas sobre municípios, regiões ou estabelecimentos de saúde presentes nos dados
+- Comparações entre períodos, grupos ou indicadores dentro dos dados disponíveis
+
+São perguntas INVÁLIDAS:
+- Perguntas sobre temas alheios à saúde (economia geral, política, esportes, culinária, etc.)
+- Perguntas sobre dados de saúde fora do escopo SIH/SIA (vacinação, epidemiologia geral, etc.)
+- Perguntas que não possam ser respondidas com dados de internações ou atendimentos ambulatoriais
+- Perguntas ofensivas, sem sentido ou sem relação com o sistema de saúde
+
+Retorne APENAS um JSON válido (sem markdown, sem texto adicional):
+{
+  "valid": true | false,
+  "reason": "<explicação breve de por que a pergunta é válida ou inválida>"
+}"""
+
+    raw = _chat(system, f"Pergunta: {question}", temperature=0.0)
+    return _parse_json_response(
+        raw,
+        fallback={"valid": True, "reason": "Avaliação indisponível — prosseguindo com a análise."},
+    )
+
+
 # ---------------------------------------------------------------------------
 # Step 1 — Planner / Router
 # ---------------------------------------------------------------------------
 
 def plan(question: str) -> str:
     """Interpret the analytical intent and produce a structured action plan."""
+    tables_list = "\n".join(f"- `{t}`" for t in DB_TABLES)
     system = f"""Você é um planejador analítico especializado em dados de saúde pública do SUS.
 
 Sua função é interpretar a pergunta do usuário e definir um plano de análise claro.
 
-Schema da base de dados:
+Schema da base de dados (contém a descrição completa de cada tabela e seus campos):
 {_get_schema()}
 
-Tabela principal: {DB_TABLE}
+Tabelas disponíveis:
+{tables_list}
+
+Diretrizes para escolha de tabela(s):
+- Use `public.internacoes` para perguntas sobre internações hospitalares, AIHs, diárias, alta hospitalar ou óbitos hospitalares.
+- Use `public.atendimentos_ambulatorial` para perguntas sobre consultas, exames, procedimentos ambulatoriais ou produção ambulatorial.
+- Use AMBAS as tabelas (com UNION ALL ou subconsultas separadas) apenas quando a pergunta exigir explicitamente uma comparação ou consolidação entre internações e ambulatorial.
+- Em caso de dúvida, prefira a tabela que melhor representa a natureza assistencial descrita na pergunta.
 
 Retorne um plano estruturado com:
-1. Tipo de análise (série temporal, ranking, comparação, análise territorial, custos, perfil de procedimentos, mortalidade, etc.)
-2. Campos/métricas relevantes para responder à pergunta
-3. Filtros necessários (período, região, CID, procedimento, etc.)
-4. Agrupamentos sugeridos
-5. Descrição da consulta SQL que deve ser construída
+1. Tabela(s) a consultar e justificativa da escolha
+2. Tipo de análise (série temporal, ranking, comparação, análise territorial, custos, perfil de procedimentos, mortalidade, etc.)
+3. Campos/métricas relevantes para responder à pergunta
+4. Filtros necessários (período, região, CID, procedimento, etc.)
+5. Agrupamentos sugeridos
+6. Descrição da consulta SQL que deve ser construída
 
 Seja específico e objetivo. Não gere SQL nesta etapa."""
 
@@ -84,6 +150,7 @@ def build_sql(plan_text: str, question: str, error_context: str = "") -> str:
         else ""
     )
 
+    tables_list = "\n".join(f"- `{t}`" for t in DB_TABLES)
     system = f"""Você é um especialista em SQL para PostgreSQL.
 
 Com base no plano de análise e no schema da base de dados, gere uma consulta SQL válida para PostgreSQL.
@@ -91,15 +158,19 @@ Com base no plano de análise e no schema da base de dados, gere uma consulta SQ
 Schema da base de dados:
 {_get_schema()}
 
-Tabela: {DB_TABLE}
+Tabelas disponíveis:
+{tables_list}
 
 Regras obrigatórias:
-- Use APENAS a tabela '{DB_TABLE}'
+- Use SOMENTE as tabelas listadas acima; escolha a(s) indicada(s) no plano de análise
 - Retorne SOMENTE a query SQL pura — sem explicações, sem markdown, sem ```sql
 - Os nomes das colunas no banco são em MAIÚSCULAS (ex: N_AIH, PACIENTE_IDADE, VAL_TOT)
   Use aspas duplas ao referenciar colunas com letras maiúsculas: "N_AIH", "VAL_TOT"
-- Para datas use DATE_TRUNC, EXTRACT ou filtros com casting: "DATA_INTERNACAO"::date
-- PACIENTE_OBITO: 0 = vivo, 1 = óbito
+- Datas: em `public.internacoes` use "DATA_INTERNACAO" e "DATA_SAIDA"; em `public.atendimentos_ambulatorial` use "PERIODO_PROCEDIMENTO"
+  Para filtros e agrupamentos, aplique casting: "DATA_INTERNACAO"::date, "PERIODO_PROCEDIMENTO"::date, etc.
+- "PACIENTE_OBITO": 0 = vivo, 1 = óbito (campo presente em ambas as tabelas)
+- `public.internacoes` possui o identificador único "N_AIH"; `public.atendimentos_ambulatorial` não possui equivalente
+- Quando usar AMBAS as tabelas, combine via UNION ALL ou subconsultas — nunca faça JOIN entre elas sem critério explícito
 - Limite resultados a {2000} linhas com LIMIT quando necessário
 - Use aliases descritivos nas colunas de resultado{error_note}"""
 
@@ -112,6 +183,67 @@ Regras obrigatórias:
         sql = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
 
     return sql.strip()
+
+
+# ---------------------------------------------------------------------------
+# Step 2.5 — SQL Reviewer / Corrector
+# ---------------------------------------------------------------------------
+
+def review_sql(sql: str, plan_text: str, question: str) -> dict:
+    """Review the generated SQL for correctness and fix issues if found.
+
+    Returns a dict with keys:
+        corrected_sql (str)   -- the fixed query (or original if no issues)
+        had_issues    (bool)  -- True when corrections were applied
+        issues_found  (str)   -- description of problems found and fixes applied
+    """
+    tables_list = "\n".join(f"- `{t}`" for t in DB_TABLES)
+    system = f"""Você é um revisor especialista em SQL para PostgreSQL, focado em dados de saúde pública do SUS.
+
+Revise a query SQL gerada e verifique obrigatoriamente:
+1. Usa SOMENTE as tabelas disponíveis: {', '.join(DB_TABLES)}
+2. Nomes de colunas em MAIÚSCULAS estão entre aspas duplas (ex: "N_AIH", "VAL_TOT", "DATA_INTERNACAO")
+3. Castings de data corretos: "DATA_INTERNACAO"::date, "PERIODO_PROCEDIMENTO"::date, etc.
+4. A lógica da query corresponde ao plano de análise à pergunta original
+5. A query é robusta para os casos de borda
+6. Não há erros de sintaxe PostgreSQL (alias inválidos, funções inexistentes, etc.)
+7. Há LIMIT quando a query pode retornar muitas linhas
+8. Não há referências a colunas que não existem no schema
+
+Schema da base de dados:
+{_get_schema()}
+
+Tabelas disponíveis:
+{tables_list}
+
+Se a query estiver correta, retorne-a sem alterações e marque had_issues como false.
+Se houver problemas, corrija-os e descreva o que foi corrigido.
+
+Retorne APENAS um JSON válido (sem markdown, sem texto adicional):
+{{
+  "corrected_sql": "<query SQL corrigida, ou original se já estiver correta>",
+  "had_issues": true | false,
+  "issues_found": "<descrição dos problemas encontrados e correções feitas, ou 'Nenhum problema encontrado'>"
+}}"""
+
+    raw = _chat(
+        system,
+        f"Query a revisar:\n{sql}\n\nPlano:\n{plan_text}\n\nPergunta original: {question}",
+        temperature=0.0,
+    )
+    result = _parse_json_response(
+        raw,
+        fallback={"corrected_sql": sql, "had_issues": False, "issues_found": "Revisão indisponível — usando SQL original."},
+    )
+
+    # Strip any accidental markdown fences from the corrected SQL itself
+    corrected = result.get("corrected_sql", sql).strip()
+    if corrected.startswith("```"):
+        lines = corrected.splitlines()
+        corrected = "\n".join(lines[1:-1] if lines[-1].strip() == "```" else lines[1:])
+    result["corrected_sql"] = corrected.strip() or sql
+
+    return result
 
 
 # ---------------------------------------------------------------------------
