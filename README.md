@@ -118,6 +118,72 @@ python main.py "Quais os procedimentos ambulatoriais mais realizados em Goiânia
 
 ---
 
+## 6. Avaliação — LLM as a Judge + Ablation Study
+
+O módulo `evaluation/` avalia automaticamente o desempenho do agente usando um segundo LLM como juiz, e compara os resultados em duas condições:
+
+| Condição | Guardrail de pergunta (step 0) | Verificador (step 5) |
+|---|:---:|:---:|
+| **Com guardrails** | ✅ ativo | ✅ ativo |
+| **Sem guardrails** *(ablation)* | ❌ desativado | ❌ desativado |
+
+### Configurar o modelo juiz
+
+No `.env`, defina o modelo que atuará como juiz:
+
+```env
+GROQ_LLM_AS_A_JUDGE_MODEL=openai/gpt-oss-120b   # modelo padrão do exemplo
+```
+
+### Executar a avaliação completa
+
+```bash
+python evaluation/run_evaluation.py
+```
+
+### Opções disponíveis
+
+```bash
+# Avaliar perguntas específicas pelo ID (1-based)
+python evaluation/run_evaluation.py --ids 1 3 9
+
+# Rodar apenas um dos modos (sem ablation)
+python evaluation/run_evaluation.py --mode com_guardrails
+python evaluation/run_evaluation.py --mode sem_guardrails
+```
+
+### Banco de perguntas
+
+O arquivo `evaluation/questions.py` contém **11 perguntas** divididas em:
+
+| Categoria | Qtd. | Descrição |
+|---|:---:|---|
+| Internações | 5 | Diagnósticos, custos, mortalidade, hospitais, faixa etária |
+| Ambulatorial | 3 | Ranking de procedimentos, distribuição geomédica, grupos diagnósticos |
+| Fora do escopo | 3 | Testes de guardrail (economia, política, vacinação) |
+
+### Saídas geradas
+
+Os resultados são salvos em `evaluation/results/`:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `evaluation_results.json` | Dados brutos completos (pipeline + scores por pergunta/modo) |
+| `evaluation_report.md` | Relatório legível com tabelas comparativas, médias e análise de guardrails |
+
+### Critérios de avaliação
+
+Para perguntas **no escopo**, o juiz pontua de 1 a 5 em quatro dimensões:
+
+- **Relevância** — a resposta aborda diretamente a pergunta?
+- **Acurácia** — os números e conclusões são internamente consistentes?
+- **Clareza** — a resposta é acessível para gestores de saúde?
+- **Completude** — todos os aspectos da pergunta foram cobertos?
+
+Para perguntas **fora do escopo**, o juiz avalia se o guardrail recusou corretamente a pergunta e a qualidade da mensagem de recusa.
+
+---
+
 ## Estrutura do Projeto
 
 ```
@@ -135,6 +201,14 @@ poc_grupo_55/
 │   └── requirements.txt              # Dependências do script de carga
 ├── docs/
 │   └── about_data.md                  # Schema e descrição das tabelas
+├── evaluation/
+│   ├── config.py                      # Modelo juiz (GROQ_LLM_AS_A_JUDGE_MODEL)
+│   ├── questions.py                   # Banco de 11 perguntas de teste
+│   ├── runner.py                      # Pipeline com e sem guardrails
+│   ├── judge.py                       # Avaliação LLM-as-a-judge
+│   ├── report.py                      # Geração de relatório JSON + Markdown
+│   ├── run_evaluation.py              # Entrypoint CLI da avaliação
+│   └── results/                       # Resultados gerados (criado automaticamente)
 ├── docker-compose.yml                 # Serviços: postgres + agent
 ├── Dockerfile                         # Imagem do agente
 ├── main.py                            # Entrypoint do agente
