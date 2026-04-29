@@ -67,6 +67,7 @@ def _run_and_judge_question(q_id: int, q, modes: list[str]) -> dict:
                 response=result.response,
                 mode=mode,
                 plan=result.plan,
+                sql=result.sql,
                 analysis=result.analysis,
                 verification=result.verification,
             )
