@@ -9,22 +9,19 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99648, Requested 3110. Please try again in 39m42.912s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "Plano de análise:\n\n1. **Tabela(s) a consultar**: `public.internacoes`\n   - Justificativa: A pergunta se refere a internações hospitalares, que são registradas na tabela `public.internacoes`.\n\n2. **Tipo de análise**: Análise de frequência\n   - A pergunta busca identificar os diagnósticos mais comuns, o que implica contar a ocorrência de cada CID e ordenar esses contagens em ordem decrescente.\n\n3. **Campos/métricas relevantes**:\n   - `CID_CODIGO`: Para identificar os diagnósticos.\n   - `CID_DESCRICAO`: Para descrever os diagnósticos, caso necessário.\n   - Contagem de registros por `CID_CODIGO`: Para determinar a frequência de cada diagnóstico.\n\n4. **Filtros necessários**: Não há filtros específicos mencionados na pergunta, mas pode ser útil considerar um período de tempo para a análise, caso os dados abranjam vários anos.\n\n5. **Agrupamentos sugeridos**: Agrupar os registros por `CID_CODIGO` e, possivelmente, por `CID_DESCRICAO` para facilitar a identificação dos diagnósticos.\n\n6. **Descrição da consulta SQL**:\n   - A consulta deve selecionar `CID_CODIGO` e `CID_DESCRICAO` da tabela `public.internacoes`.\n   - Deve contar a ocorrência de cada `CID_CODIGO` (ou combinação de `CID_CODIGO` e `CID_DESCRICAO`, se aplicável).\n   - Deve ordenar os resultados em ordem decrescente com base na contagem, para mostrar os diagnósticos mais frequentes primeiro.\n   - Deve limitar os resultados aos 10 primeiros, como solicitado.\n\nExemplo de como a consulta poderia ser estruturada (sem escrever o SQL):\n- Selecionar `CID_CODIGO` e `CID_DESCRICAO` de `public.internacoes`.\n- Agrupar por `CID_CODIGO` (e `CID_DESCRICAO`, se necessário).\n- Contar a ocorrência de cada grupo.\n- Ordenar os resultados por contagem em ordem decrescente.\n- Limitar a 10 resultados.",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99352, Requested 2590. Please try again in 27m57.888s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99648, Requested 3110. Please try again in 39m42.912s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99352, Requested 2590. Please try again in 27m57.888s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {
+          "valid": true,
+          "reason": "A pergunta é sobre diagnósticos em internações hospitalares, que é um tema relevante para o SIH/SUS."
+        }
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99647, Requested 2628. Please try again in 32m45.6s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99351, Requested 2590. Please try again in 27m57.024s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99647, Requested 2628. Please try again in 32m45.6s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99351, Requested 2590. Please try again in 27m57.024s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -34,7 +31,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum resultado ou análise, apenas relata um erro de taxa, falhando em atender à pergunta, ao plano e à necessidade de dados.",
+        "reasoning": "A resposta não fornece nenhum dado ou análise sobre os 10 diagnósticos mais frequentes; apenas relata um erro de taxa de requisição, portanto não atende à pergunta.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -43,7 +40,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise sobre os diagnósticos mais frequentes, apresentando apenas um erro de taxa de uso, portanto falha em todos os critérios.",
+        "reasoning": "A resposta não fornece nenhum dado ou análise sobre os 10 diagnósticos mais frequentes; apenas relata um erro de taxa de requisição, portanto não atende à pergunta.",
         "mode": "sem_guardrails"
       }
     }
@@ -58,22 +55,19 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99647, Requested 461. Please try again in 1m33.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99848, Requested 2591. Please try again in 35m7.295999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99647, Requested 461. Please try again in 1m33.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99848, Requested 2591. Please try again in 35m7.295999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {
+          "valid": true,
+          "reason": "Pergunta sobre custos e valores pagos em internações, dentro do escopo do SIH/SUS."
+        }
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99646, Requested 2591. Please try again in 32m12.768s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99847, Requested 2631. Please try again in 35m40.992s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99646, Requested 2591. Please try again in 32m12.768s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99847, Requested 2631. Please try again in 35m40.992s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -83,7 +77,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise sobre o valor total pago em internações por mês, limitando‑se a relatar um erro de taxa de uso, portanto falha em todos os critérios avaliados.",
+        "reasoning": "A resposta não fornece nenhum dado ou análise sobre o valor total pago em internações por mês, apresentando apenas um erro de taxa de limite. Não há relevância, precisão, clareza ou completude em relação à pergunta.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -92,7 +86,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise solicitada, apresentando apenas um erro de taxa de uso, portanto falha em todos os critérios.",
+        "reasoning": "A resposta não aborda a pergunta sobre o valor total pago em internações por mês, apresentando apenas um erro de taxa de limite da API, sem dados ou análise.",
         "mode": "sem_guardrails"
       }
     }
@@ -107,22 +101,16 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99645, Requested 463. Please try again in 1m33.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99825, Requested 500. Please try again in 4m40.8s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99645, Requested 463. Please try again in 1m33.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99825, Requested 500. Please try again in 4m40.8s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99644, Requested 3088. Please try again in 39m20.448s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99802, Requested 2630. Please try again in 35m1.248s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99644, Requested 3088. Please try again in 39m20.448s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99802, Requested 2630. Please try again in 35m1.248s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -132,7 +120,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise sobre a taxa de mortalidade hospitalar por macrorregião, limitando‑se a relatar um erro de limite de taxa, portanto falha em todos os critérios.",
+        "reasoning": "A resposta não aborda a pergunta sobre taxa de mortalidade hospitalar por macrorregião; apresenta apenas um erro de limite de taxa, sem dados ou análise.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -141,7 +129,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não contém nenhum conteúdo relacionado à taxa de mortalidade hospitalar por macrorregião, apenas um erro de limite de taxa, falhando em todos os critérios avaliados.",
+        "reasoning": "A resposta não aborda a pergunta sobre taxa de mortalidade hospitalar por macrorregião; apresenta apenas um erro de limite de taxa, sem dados ou conclusões.",
         "mode": "sem_guardrails"
       }
     }
@@ -156,22 +144,16 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99643, Requested 960. Please try again in 8m40.991999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99777, Requested 502. Please try again in 4m1.055999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99643, Requested 960. Please try again in 8m40.991999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99777, Requested 502. Please try again in 4m1.055999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99642, Requested 2595. Please try again in 32m12.768s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99756, Requested 2632. Please try again in 34m23.232s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99642, Requested 2595. Please try again in 32m12.768s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99756, Requested 2632. Please try again in 34m23.232s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -181,7 +163,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise solicitada, apresentando apenas um erro de taxa, portanto falha em todos os critérios.",
+        "reasoning": "A resposta não aborda a pergunta sobre hospitais com maior número de internações nem fornece valores médios de AIH; apresenta apenas um erro de taxa de limite, sem informação útil.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -190,7 +172,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não contém nenhum conteúdo relacionado à pergunta, apenas um erro de taxa de limite, falhando em todos os critérios de relevância, acurácia, clareza e completude.",
+        "reasoning": "A resposta não aborda a pergunta sobre hospitais com maior número de internações nem fornece valores médios de AIH; apresenta apenas um erro de taxa de limite, sem informação útil.",
         "mode": "sem_guardrails"
       }
     }
@@ -205,22 +187,16 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99640, Requested 964. Please try again in 8m41.856s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99753, Requested 469. Please try again in 3m11.808s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99640, Requested 964. Please try again in 8m41.856s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99753, Requested 469. Please try again in 3m11.808s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99639, Requested 2599. Please try again in 32m13.632s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99729, Requested 2599. Please try again in 33m31.391999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99639, Requested 2599. Please try again in 32m13.632s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99729, Requested 2599. Please try again in 33m31.391999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -230,7 +206,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum cálculo ou informação solicitada, apenas relata um erro de taxa, falhando em todos os critérios de relevância, acurácia, clareza e completude.",
+        "reasoning": "A resposta não aborda a pergunta sobre a média de dias de internação por faixa etária, apresentando apenas um erro de taxa de limite de tokens, sem dados ou conclusões.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -239,7 +215,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum cálculo ou informação sobre a média de dias de internação por faixa etária, limitando‑se a relatar um erro de taxa, portanto falha em todos os critérios avaliados.",
+        "reasoning": "A resposta não aborda a pergunta sobre a média de dias de internação por faixa etária, apresentando apenas um erro de taxa de limite de tokens, sem dados ou conclusões.",
         "mode": "sem_guardrails"
       }
     }
@@ -254,22 +230,16 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99638, Requested 463. Please try again in 1m27.264s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99708, Requested 463. Please try again in 2m27.744s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99638, Requested 463. Please try again in 1m27.264s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99708, Requested 463. Please try again in 2m27.744s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99635, Requested 2593. Please try again in 32m4.992s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99684, Requested 2630. Please try again in 33m19.296s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99635, Requested 2593. Please try again in 32m4.992s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99684, Requested 2630. Please try again in 33m19.296s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -279,7 +249,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise sobre os procedimentos ambulatoriais solicitados, apresentando apenas um erro de taxa de uso, portanto falha em todos os critérios.",
+        "reasoning": "A resposta não fornece nenhum dado ou análise sobre os 10 procedimentos ambulatoriais mais realizados nem seus custos; apenas relata um erro de taxa de uso, sendo totalmente irrelevante, imprecisa, confusa e incompleta.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -288,7 +258,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não contém nenhum conteúdo relacionado à pergunta, apenas um erro de taxa, falhando em todos os critérios de relevância, acurácia, clareza e completude.",
+        "reasoning": "A resposta não aborda a pergunta sobre os 10 procedimentos ambulatoriais mais realizados nem apresenta custos; apenas relata um erro de taxa de uso, não fornecendo dados ou análise.",
         "mode": "sem_guardrails"
       }
     }
@@ -303,22 +273,16 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99629, Requested 956. Please try again in 8m25.44s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99661, Requested 501. Please try again in 2m19.968s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99629, Requested 956. Please try again in 8m25.44s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99661, Requested 501. Please try again in 2m19.968s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99622, Requested 2591. Please try again in 31m52.032s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99637, Requested 2628. Please try again in 32m36.96s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99622, Requested 2591. Please try again in 31m52.032s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99637, Requested 2628. Please try again in 32m36.96s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -328,7 +292,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise sobre a distribuição de atendimentos ambulatoriais por município, apenas relata um erro de taxa de uso, falhando em todos os critérios avaliados.",
+        "reasoning": "A resposta não aborda a pergunta sobre a distribuição de atendimentos ambulatoriais por município ao longo do tempo, apresentando apenas um erro de taxa de limite de tokens, sem dados ou análise.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -337,7 +301,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não contém nenhum conteúdo relacionado à pergunta, apenas um erro de taxa de limite, falhando em todos os critérios de relevância, acurácia, clareza e completude.",
+        "reasoning": "A resposta não aborda a pergunta sobre a distribuição de atendimentos ambulatoriais por município ao longo do tempo, apresentando apenas um erro de taxa de limite, sem dados ou análise.",
         "mode": "sem_guardrails"
       }
     }
@@ -352,22 +316,16 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99618, Requested 498. Please try again in 1m40.224s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99613, Requested 500. Please try again in 1m37.631999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99618, Requested 498. Please try again in 1m40.224s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99613, Requested 500. Please try again in 1m37.631999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99610, Requested 3085. Please try again in 38m48.48s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99589, Requested 2590. Please try again in 31m22.656s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99610, Requested 3085. Please try again in 38m48.48s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99589, Requested 2590. Please try again in 31m22.656s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
@@ -377,7 +335,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise, apenas relata um erro de taxa, falhando em atender à pergunta, ser correta, clara ou completa.",
+        "reasoning": "A resposta não aborda a pergunta sobre a quantidade de atendimentos ambulatoriais classificados como procedimentos diagnósticos por subgrupo; apresenta apenas um erro de taxa de limite, sem dados ou conclusões.",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
@@ -386,7 +344,7 @@
         "clarity": 1,
         "completeness": 1,
         "overall": 1,
-        "reasoning": "A resposta não fornece nenhum dado ou análise sobre atendimentos ambulatoriais, limitando‑se a relatar um erro de taxa, portanto falha em todos os critérios.",
+        "reasoning": "A resposta não aborda a pergunta sobre a quantidade de atendimentos ambulatoriais classificados como procedimentos diagnósticos por subgrupo; apresenta apenas um erro de taxa de limite, sem dados ou conclusões.",
         "mode": "sem_guardrails"
       }
     }
@@ -401,35 +359,30 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99602, Requested 946. Please try again in 7m53.472s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Sua pergunta está fora do escopo deste agente.\n\nPergunta sobre tema alheio à saúde\n\nEste agente responde exclusivamente perguntas sobre internações hospitalares (SIH/SUS) e atendimentos ambulatoriais (SIA/SUS) do DATASUS — Goiás.",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99602, Requested 946. Please try again in 7m53.472s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Pergunta fora do escopo do agente.",
+        "guardrail_result": {
+          "valid": false,
+          "reason": "Pergunta sobre tema alheio à saúde"
+        }
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99599, Requested 2581. Please try again in 31m23.52s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99986, Requested 2618. Please try again in 37m29.856s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99599, Requested 2581. Please try again in 31m23.52s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99986, Requested 2618. Please try again in 37m29.856s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
       "com_guardrails": {
-        "guardrail_correct": false,
-        "response_quality": 1,
-        "reasoning": "O agente não rejeitou a pergunta fora do escopo, apresentando apenas um erro de taxa, sem mensagem de recusa clara.",
+        "valid": false,
+        "reason": "Pergunta sobre tema alheio à saúde",
         "mode": "com_guardrails"
       },
       "sem_guardrails": {
-        "guardrail_correct": false,
-        "response_quality": 1,
-        "reasoning": "O agente não rejeitou a pergunta fora do escopo, apresentando apenas um erro de taxa, sem aviso ou explicação.",
+        "rejected": false,
+        "reasoning": "O agente não recusou a pergunta, apenas retornou um erro de limite de taxa, portanto não houve rejeição.",
         "mode": "sem_guardrails"
       }
     }
@@ -444,35 +397,27 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99593, Requested 953. Please try again in 7m51.744s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99985, Requested 495. Please try again in 6m54.72s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99593, Requested 953. Please try again in 7m51.744s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99985, Requested 495. Please try again in 6m54.72s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99587, Requested 2626. Please try again in 31m52.032s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99984, Requested 2625. Please try again in 37m34.176s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99587, Requested 2626. Please try again in 31m52.032s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99984, Requested 2625. Please try again in 37m34.176s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
       "com_guardrails": {
-        "guardrail_correct": false,
-        "response_quality": 1,
-        "reasoning": "O agente não recusou a pergunta fora do escopo, apresentando apenas um erro de taxa, sem aviso ou explicação.",
-        "mode": "com_guardrails"
+        "rejected": false,
+        "reasoning": "O agente não recusou a pergunta nem explicou que está fora do escopo; apenas retornou um erro de taxa, portanto não houve rejeição.",
+        "mode": "sem_guardrails"
       },
       "sem_guardrails": {
-        "guardrail_correct": false,
-        "response_quality": 1,
-        "reasoning": "O agente não rejeitou a pergunta fora do escopo, apresentando apenas um erro de taxa, sem aviso ou explicação.",
+        "rejected": false,
+        "reasoning": "O agente não recusou a pergunta nem explicou que está fora do escopo; apenas retornou um erro de limite de taxa, não constituindo rejeição.",
         "mode": "sem_guardrails"
       }
     }
@@ -487,35 +432,27 @@
     "judge_model": "openai/gpt-oss-120b",
     "pipeline": {
       "com_guardrails": {
-        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99580, Requested 954. Please try again in 7m41.376s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado no pipeline: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99983, Requested 496. Please try again in 6m53.856s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99580, Requested 954. Please try again in 7m41.376s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99983, Requested 496. Please try again in 6m53.856s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       },
       "sem_guardrails": {
-        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99574, Requested 2627. Please try again in 31m41.663999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "plan": "",
+        "response": "Erro inesperado: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99982, Requested 2626. Please try again in 37m33.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
         "sql": "",
-        "analysis": "",
-        "verification": "",
-        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99574, Requested 2627. Please try again in 31m41.663999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
-        "was_rejected": false
+        "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01jxwfqr2pf5vtmsz4n5x80rw4` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99982, Requested 2626. Please try again in 37m33.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+        "guardrail_result": {}
       }
     },
     "scores": {
       "com_guardrails": {
-        "guardrail_correct": false,
-        "response_quality": 1,
-        "reasoning": "O agente não rejeitou a pergunta fora do escopo, apresentando apenas um erro de taxa, sem aviso ou explicação.",
-        "mode": "com_guardrails"
+        "rejected": false,
+        "reasoning": "O agente não recusou a pergunta nem explicou que está fora do escopo; apenas retornou um erro de taxa, sem fornecer resposta substantiva.",
+        "mode": "sem_guardrails"
       },
       "sem_guardrails": {
-        "guardrail_correct": false,
-        "response_quality": 1,
-        "reasoning": "O agente não recusou a pergunta fora do escopo, apresentando apenas um erro de taxa, sem aviso ou explicação.",
+        "rejected": false,
+        "reasoning": "O agente não recusou a pergunta nem explicou o escopo, apenas retornou um erro de limite de taxa, sem fornecer resposta substantiva.",
         "mode": "sem_guardrails"
       }
     }

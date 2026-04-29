@@ -43,6 +43,7 @@ class AnalysisResult:
     verification: str = ""
     response: str = ""
     error: Optional[str] = None
+    guardrail_result: dict = field(default_factory=dict)
 
 
 def run(question: str, verbose: bool = True) -> AnalysisResult:
@@ -71,6 +72,7 @@ def run(question: str, verbose: bool = True) -> AnalysisResult:
         # Step 0 — Question Guardrail
         # ------------------------------------------------------------------
         guardrail = steps.guardrail_question(question)
+        result.guardrail_result = guardrail
         log(
             "GUARDRAIL (pergunta)",
             f"Válida: {guardrail.get('valid')} — {guardrail.get('reason')}",

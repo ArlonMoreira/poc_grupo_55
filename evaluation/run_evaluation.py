@@ -11,8 +11,9 @@ Outputs (saved to evaluation/results/):
     evaluation_report.md     – human-readable report
 """
 import argparse
-import sys
+import json
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -21,8 +22,33 @@ from evaluation.questions import QUESTIONS
 from evaluation import runner, judge, report
 from agent.config import GROQ_MODEL
 
+_ABOUT_DATA_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "docs", "about_data.md"
+)
 
-def _run_and_judge_question(q_id: int, q, modes: list[str]) -> dict:
+
+def _load_about_data() -> str:
+    with open(_ABOUT_DATA_PATH, encoding="utf-8") as f:
+        return f.read()
+
+
+def _format_sql_result(raw_result: dict) -> str:
+    if not raw_result:
+        return ""
+    return json.dumps(
+        {
+            "columns": raw_result.get("columns", []),
+            "row_count": raw_result.get("row_count", 0),
+            "sample_rows": raw_result.get("rows", [])[:10],
+            "truncated": raw_result.get("truncated", False),
+        },
+        ensure_ascii=False,
+        indent=2,
+        default=str,
+    )
+
+
+def _run_and_judge_question(q_id: int, q, modes: list[str], about_data: str) -> dict:
     """Run both pipeline modes and score the results for one question."""
     record: dict = {
         "id": q_id,
@@ -44,44 +70,44 @@ def _run_and_judge_question(q_id: int, q, modes: list[str]) -> dict:
         else:
             result = runner.run_without_guardrails(q.text)
 
-        was_rejected = bool(
-            result.error == "Pergunta fora do escopo do agente."
-            or (result.response and "fora do escopo" in result.response.lower() and not result.raw_result)
-        )
-
         record["pipeline"][mode] = {
             "response": result.response,
-            "plan": result.plan,
             "sql": result.sql,
-            "analysis": result.analysis,
-            "verification": result.verification,
             "error": result.error,
-            "was_rejected": was_rejected,
+            "guardrail_result": result.guardrail_result,
         }
 
-        print(f"    [{mode}] avaliando com juiz…", flush=True)
+        print(f"    [{mode}] avaliando…", flush=True)
 
         if q.in_scope:
             scores = judge.evaluate_in_scope(
                 question=q.text,
                 response=result.response,
                 mode=mode,
-                plan=result.plan,
+                about_data=about_data,
                 sql=result.sql,
-                analysis=result.analysis,
-                verification=result.verification,
+                sql_result=_format_sql_result(result.raw_result),
             )
+            overall = scores.get("overall", "—")
+            print(f"    [{mode}] score overall: {overall}", flush=True)
         else:
-            scores = judge.evaluate_out_of_scope(
-                question=q.text,
-                response=result.response,
-                mode=mode,
-                was_rejected_by_guardrail=was_rejected,
-            )
+            if mode == "com_guardrails" and result.guardrail_result:
+                scores = {
+                    "valid": result.guardrail_result.get("valid"),
+                    "reason": result.guardrail_result.get("reason", ""),
+                    "mode": mode,
+                }
+                print(f"    [{mode}] guardrail valid: {scores['valid']}", flush=True)
+            else:
+                # Sem guardrail: usa o LLM judge para avaliar se o Communicator
+                # rejeitou ou tentou responder a pergunta inválida.
+                scores = judge.evaluate_out_of_scope_no_guardrail(
+                    question=q.text,
+                    response=result.response,
+                )
+                print(f"    [{mode}] agente rejeitou: {scores.get('rejected')}", flush=True)
 
         record["scores"][mode] = scores
-        overall = scores.get("overall") or scores.get("response_quality", "—")
-        print(f"    [{mode}] score overall/qualidade: {overall}", flush=True)
 
     return record
 
@@ -114,6 +140,8 @@ def main() -> None:
         else [(i + 1, QUESTIONS[i - 1]) for i in args.ids if 1 <= i <= len(QUESTIONS)]
     )
 
+    about_data = _load_about_data()
+
     print(f"\n{'=' * 60}")
     print(f"LLM-as-a-Judge — Avaliação do Agente SIH/SIA")
     print(f"Modelo agente : {GROQ_MODEL}")
@@ -130,7 +158,7 @@ def main() -> None:
         print(f"  \"{q.text}\"")
 
         try:
-            record = _run_and_judge_question(q_id, q, modes)
+            record = _run_and_judge_question(q_id, q, modes, about_data)
             all_results.append(record)
         except Exception as exc:
             print(f"  ⚠️  Erro ao processar Q{q_id}: {exc}")

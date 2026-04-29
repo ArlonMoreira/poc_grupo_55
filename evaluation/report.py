@@ -121,31 +121,50 @@ def generate_markdown_report(results: list[dict]) -> str:
         "",
         "## 2. Perguntas Fora do Escopo (teste de guardrails)",
         "",
-        "| # | Pergunta | Modo | Guardrail correto | Qualidade resp. | Raciocínio |",
-        "|---|----------|------|:-----------------:|:---------------:|------------|",
+        "| # | Pergunta | Modo | Resultado | Raciocínio do juiz |",
+        "|---|----------|------|:---------:|-------------------|",
     ]
     for r in out_scope:
-        for mode_key, mode_label in [("com_guardrails", "c/ guardrails"), ("sem_guardrails", "s/ guardrails")]:
-            scores = r.get("scores", {}).get(mode_key, {})
-            q_short = r["question"][:50] + "…" if len(r["question"]) > 50 else r["question"]
-            gc = "✅ Sim" if scores.get("guardrail_correct") else "❌ Não"
-            rq = scores.get("response_quality", "—")
-            reasoning = scores.get("reasoning", "N/A")[:120]
-            lines.append(f"| {r['id']} | {q_short} | {mode_label} | {gc} | {rq} | {reasoning} |")
+        q_short = r["question"][:50] + "…" if len(r["question"]) > 50 else r["question"]
 
-    # Guardrail effectiveness summary
+        # com_guardrails: usa campo valid (False = rejeitou corretamente)
+        cg_scores = r.get("scores", {}).get("com_guardrails", {})
+        valid = cg_scores.get("valid")
+        if valid is True:
+            cg_result = "⚠️ Não rejeitou"
+        elif valid is False:
+            cg_result = "✅ Rejeitou (guardrail)"
+        else:
+            cg_result = "— (sem dado)"
+        cg_reason = cg_scores.get("reason", "N/A")[:120]
+        lines.append(f"| {r['id']} | {q_short} | c/ guardrails | {cg_result} | {cg_reason} |")
+
+        # sem_guardrails: usa campo rejected (True = agente rejeitou por conta própria)
+        sg_scores = r.get("scores", {}).get("sem_guardrails", {})
+        rejected = sg_scores.get("rejected")
+        if rejected is True:
+            sg_result = "✅ Rejeitou (sem guardrail)"
+        elif rejected is False:
+            sg_result = "❌ Tentou responder"
+        else:
+            sg_result = "— (sem dado)"
+        sg_reason = sg_scores.get("reasoning", "N/A")[:120]
+        lines.append(f"| {r['id']} | {q_short} | s/ guardrails | {sg_result} | {sg_reason} |")
+
+    total_oos = len(out_scope)
     g_correct_with = sum(
-        1 for r in out_scope if r.get("scores", {}).get("com_guardrails", {}).get("guardrail_correct", False)
+        1 for r in out_scope
+        if r.get("scores", {}).get("com_guardrails", {}).get("valid") is False
     )
     g_correct_without = sum(
-        1 for r in out_scope if r.get("scores", {}).get("sem_guardrails", {}).get("guardrail_correct", False)
+        1 for r in out_scope
+        if r.get("scores", {}).get("sem_guardrails", {}).get("rejected") is True
     )
-    total_oos = len(out_scope)
 
     lines += [
         "",
-        f"**Acerto do guardrail — Com guardrails:** {g_correct_with}/{total_oos}  ",
-        f"**Acerto do guardrail — Sem guardrails:** {g_correct_without}/{total_oos}  ",
+        f"**Rejeições corretas — Com guardrails:** {g_correct_with}/{total_oos}  ",
+        f"**Rejeições corretas — Sem guardrails (avaliado pelo juiz):** {g_correct_without}/{total_oos}  ",
         "",
     ]
 
@@ -177,7 +196,7 @@ def generate_markdown_report(results: list[dict]) -> str:
         "| Métrica | Com Guardrails | Sem Guardrails |",
         "|---------|:--------------:|:--------------:|",
         f"| Média geral (perguntas no escopo) | **{with_g['overall']}** | **{without_g['overall']}** |",
-        f"| Guardrails corretos (fora do escopo) | **{g_correct_with}/{total_oos}** | **{g_correct_without}/{total_oos}** |",
+        f"| Rejeições corretas (fora do escopo) | **{g_correct_with}/{total_oos}** | **{g_correct_without}/{total_oos}** |",
         "",
         "> *Relatório gerado automaticamente pelo módulo `evaluation/` do projeto poc_grupo_55.*",
     ]
