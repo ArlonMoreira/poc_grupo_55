@@ -45,6 +45,7 @@ def _chat(system: str, user: str) -> str:
             {"role": "user", "content": user},
         ],
         temperature=0.0,
+        max_tokens=200,
     )
     return resp.choices[0].message.content.strip()
 
@@ -157,7 +158,8 @@ Avalie a resposta do agente segundo os critérios abaixo, usando escala de 1 a 5
 Instruções adicionais:
 - Use a documentação dos dados para verificar se a SQL consulta as tabelas e colunas corretas para responder à pergunta.
 - Use o resultado do SQL como fonte de verdade para verificar se os números e conclusões na resposta final são corretos.
-- Penalize respostas que apresentem valores inconsistentes com o resultado do SQL.
+- Penalize respostas que apresentem inconstencias em relação ao resultado do SQL e a resposta final.
+- Penalize se a query do SQL estiver incorreta, ou incompleta em relação à pergunta.
 
 Escala de referência:
   1 = completamente inadequado / ausente
